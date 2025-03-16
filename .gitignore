@@ -1,0 +1,9 @@
+# Go workspace file
+go.work
+go.work.sum
+
+# env file
+.env
+
+# db doesn't need to be saved
+*.db
