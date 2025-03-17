@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+	//"slices"
+	//"reflect"
 
 	"github.com/joho/godotenv"
 	"github.com/Jleagle/steam-go/steamapi"
@@ -13,15 +15,7 @@ import (
 	//"database/sql/driver"
 	//"gorm.io/driver/sqlite"
 )
-
-type Game struct {
-	ID       uint   `gorm:"primaryKey"`
-	AppID    uint64 `gorm:"uniqueIndex"`
-	Name     string
-	Playtime int
-}
-
-var SteamDB *gorm.DB
+var steamDb *gorm.DB
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -57,4 +51,31 @@ func main() {
 	})
 
 	fmt.Printf("Random game: %v\n", gameList[0])
+
+	/*for _, game := range gameList {
+		if(game.Name == "Subverse") {
+			details, err := client.GetAppDetails(uint(game.AppID), COUNTRY_CODE, LANGUAGE_CODE, []string{})
+			if err != nil {
+				return
+			}
+
+			fmt.Printf("%v\n", reflect.TypeOf(details.Data.ContentDescriptors.IDs))
+			if ids, ok := details.Data.ContentDescriptors.IDs.([]interface{}); ok {
+				for _, v := range ids {
+					//fmt.Printf("%v\n", reflect.TypeOf(v))
+					if num, ok := v.(float64); ok && num == 4 {
+						fmt.Printf("This game likely has sexual content and shouldn't be included: %s\n", game.Name)
+					}
+				}
+			}
+			
+		//if(slices.Contains(details.Data.ContentDescriptors.IDs, "4")) {
+		//	fmt.Printf("Game details: %v\n", details.Data.ContentDescriptors.IDs)
+		//}
+		}
+		
+
+		
+		time.Sleep(100 * time.Millisecond)
+	}*/
 }
