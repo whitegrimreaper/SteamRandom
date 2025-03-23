@@ -85,8 +85,9 @@ func checkGamesForNSFWContent(client steamapi.Client) {
 				// 1 is general nudity or sexual content, 3 is for "adult only" sexual content, and 4 is "gratuitous" sexual content.
 				// Personally I don't have many nsfw games, but I would generally say that 3 and 4 are tags for games you should not play on
 				// regular livestreams. 1 is hit or miss
-				if num, ok := v.(float64); ok && num == 4 {
+				if num, ok := v.(float64); ok && (num == 3 || num == 4){
 					fmt.Printf("This game likely has sexual content and shouldn't be included: %s\n", game.Name)
+					tagGameAsNSFW(game.AppID, true)
 				}
 			}
 		}

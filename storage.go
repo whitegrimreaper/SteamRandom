@@ -55,6 +55,23 @@ func doesGameEntryExist(targetGame int)(exists bool, err error) {
 	return true, nil
 }
 
+func tagGameAsNSFW(targetGame uint64, isNSFW bool)(err error) {
+	var game GameEntry
+	err = SteamDb.First(&game, "app_id = ?", targetGame).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	err = SteamDb.Model(&game).Update("IsAdultGame", isNSFW).Error
+	if err != nil {
+		fmt.Printf("Error in Update %+v\n", err)
+		return err
+	}
+	return nil
+}
+
 func addGameEntry(game Game) {
 	var gameEntry GameEntry
 	
