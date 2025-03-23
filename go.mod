@@ -5,6 +5,8 @@ go 1.23.0
 require (
 	github.com/Jleagle/steam-go v0.0.0-20231027203227-3dc26c48c3d2
 	github.com/joho/godotenv v1.5.1
+	gorm.io/driver/sqlite v1.5.7
+	gorm.io/gorm v1.25.12
 )
 
 require (
@@ -16,6 +18,4 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	gorm.io/driver/sqlite v1.5.7 // indirect
-	gorm.io/gorm v1.25.12 // indirect
 )

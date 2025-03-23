@@ -15,7 +15,7 @@ import (
 	//"database/sql/driver"
 	//"gorm.io/driver/sqlite"
 )
-var steamDb *gorm.DB
+var SteamDb *gorm.DB
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -28,10 +28,7 @@ func main() {
 	//ctx :=  context.Background();
 	steamID := 76561198057886745
 
-	steamDb, err := setupDB();
-	if err != nil {
-		panic("failed to setup db")
-	}
+	SteamDb = setupDB();
 
 	client := steamapi.NewClient()
 	client.SetKey(apiKey)
@@ -41,7 +38,7 @@ func main() {
 	}
 
 	fmt.Printf("Retrieved %d games\n", gamesResp.GameCount)
-	fmt.Printf("Ree %v\n", steamDb)
+	fmt.Printf("Ree %v\n", SteamDb)
 
 	gameList := gamesResp.Games
 
@@ -52,30 +49,46 @@ func main() {
 
 	fmt.Printf("Random game: %v\n", gameList[0])
 
-	/*for _, game := range gameList {
-		if(game.Name == "Subverse") {
-			details, err := client.GetAppDetails(uint(game.AppID), COUNTRY_CODE, LANGUAGE_CODE, []string{})
-			if err != nil {
-				return
-			}
+	for _, game := range gameList {
+		exists, err := doesGameEntryExist(game.AppID)
+		if err != nil {
+			return
+		}
+		if !exists {
+			fmt.Printf("Adding game to db\n")
+			addGameEntry(game)
+		}
+	}
+}
 
-			fmt.Printf("%v\n", reflect.TypeOf(details.Data.ContentDescriptors.IDs))
-			if ids, ok := details.Data.ContentDescriptors.IDs.([]interface{}); ok {
-				for _, v := range ids {
-					//fmt.Printf("%v\n", reflect.TypeOf(v))
-					if num, ok := v.(float64); ok && num == 4 {
-						fmt.Printf("This game likely has sexual content and shouldn't be included: %s\n", game.Name)
-					}
+func checkGamesForNSFWContent(client steamapi.Client) {
+	// This is a very expensive function to call, and will make an API call for every item in your steam library.
+	// For me that is 1k plus calls per run, more than 1% of the 100k daily call limit
+	// Use sparingly
+
+	allGames := getAllGameEntries()
+
+	for _, game := range allGames {
+		// This is the issue line
+		details, err := client.GetAppDetails(uint(game.AppID), COUNTRY_CODE, LANGUAGE_CODE, []string{})
+		if err != nil {
+			// Keep randomly getting errors here for specific games
+			// Some are removed like MapleStory 2, some are private/dupe style games like many test servers
+			fmt.Printf("Issue getting info for app: %d, name %s\n", game.AppID, game.Name)
+			fmt.Printf("Error: %v\n", err.Error())
+		} else if ids, ok := details.Data.ContentDescriptors.IDs.([]interface{}); ok {
+			for _, v := range ids {
+				//fmt.Printf("%v\n", reflect.TypeOf(v))
+				// So the content descriptors are for violence and sexual content
+				// 2 is for violence, which is fine on Twitch/YT in games
+				// 5 is for any mature content, also not very helpful
+				// 1 is general nudity or sexual content, 3 is for "adult only" sexual content, and 4 is "gratuitous" sexual content.
+				// Personally I don't have many nsfw games, but I would generally say that 3 and 4 are tags for games you should not play on
+				// regular livestreams. 1 is hit or miss
+				if num, ok := v.(float64); ok && num == 4 {
+					fmt.Printf("This game likely has sexual content and shouldn't be included: %s\n", game.Name)
 				}
 			}
-			
-		//if(slices.Contains(details.Data.ContentDescriptors.IDs, "4")) {
-		//	fmt.Printf("Game details: %v\n", details.Data.ContentDescriptors.IDs)
-		//}
 		}
-		
-
-		
-		time.Sleep(100 * time.Millisecond)
-	}*/
+	}	
 }
