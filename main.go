@@ -76,12 +76,13 @@ func checkGamesForNSFWContent(client steamapi.Client) {
 			// Some are removed like MapleStory 2, some are private/dupe style games like many test servers
 			fmt.Printf("Issue getting info for app: %d, name %s\n", game.AppID, game.Name)
 			fmt.Printf("Error: %v\n", err.Error())
+			fmt.Printf("Could be getting rate limited, or the game is removed")
 		} else if ids, ok := details.Data.ContentDescriptors.IDs.([]interface{}); ok {
 			for _, v := range ids {
 				//fmt.Printf("%v\n", reflect.TypeOf(v))
 				// So the content descriptors are for violence and sexual content
-				// 2 is for violence, which is fine on Twitch/YT in games
-				// 5 is for any mature content, also not very helpful
+				// 2 is for violence and gore, which is fine on Twitch/YT in games
+				// 5 is for any mature content, also not very helpful (this includes violence)
 				// 1 is general nudity or sexual content, 3 is for "adult only" sexual content, and 4 is "gratuitous" sexual content.
 				// Personally I don't have many nsfw games, but I would generally say that 3 and 4 are tags for games you should not play on
 				// regular livestreams. 1 is hit or miss
