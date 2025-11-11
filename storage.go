@@ -16,12 +16,13 @@ import (
 
 // This table will hold all games I own, regardless of if they are played or not
 type GameEntry struct {
-	ID           uint   `gorm:"primaryKey"`
-	AppID        uint64 `gorm:"uniqueIndex"`
-	Name         string
-	Playtime     int
-	IsAdultGame  bool `gorm:"default:false"`
-	HasPlayedYet bool `gorm:"default:false"`
+	ID              uint   `gorm:"primaryKey"`
+	AppID           uint64 `gorm:"uniqueIndex"`
+	Name            string
+	Playtime        int
+	IsAdultGame     bool `gorm:"default:false"`
+	HasPlayedYet    bool `gorm:"default:false"`
+	HasListingIssue bool `gorm:"default:false"`
 }
 
 // Copy of the Game struct from OwnedGames for ease of use
@@ -70,6 +71,23 @@ func tagGameAsNSFW(targetGame uint64, isNSFW bool)(err error) {
 		return err
 	}
 	err = SteamDb.Model(&game).Update("IsAdultGame", isNSFW).Error
+	if err != nil {
+		fmt.Printf("Error in Update %+v\n", err)
+		return err
+	}
+	return nil
+}
+
+func tagGameAsUnlisted(targetGame uint64, isUnlisted bool)(err error) {
+	var game GameEntry
+	err = SteamDb.First(&game, "app_id = ?", targetGame).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	err = SteamDb.Model(&game).Update("HasListingIssue", isUnlisted).Error
 	if err != nil {
 		fmt.Printf("Error in Update %+v\n", err)
 		return err

@@ -61,6 +61,9 @@ func main() {
 			addGameEntry(game)
 		}
 	}
+
+	// COMMENT THIS OUT TO NOT WASTE API CALLS
+	checkGamesForNSFWContent(*client)
 }
 
 func checkGamesForNSFWContent(client steamapi.Client, checkAllGames bool) {
@@ -80,6 +83,8 @@ func checkGamesForNSFWContent(client steamapi.Client, checkAllGames bool) {
 				fmt.Printf("Issue getting info for app: %d, name %s\n", game.AppID, game.Name)
 				fmt.Printf("Error: %v\n", err.Error())
 				fmt.Printf("Could be getting rate limited, or the game is removed")
+				tagGameAsUnlisted(game.AppID, true)
+
 			} else if ids, ok := details.Data.ContentDescriptors.IDs.([]interface{}); ok {
 				for _, v := range ids {
 					//fmt.Printf("%v\n", reflect.TypeOf(v))
@@ -99,5 +104,6 @@ func checkGamesForNSFWContent(client steamapi.Client, checkAllGames bool) {
 			// Nothing here
 			fmt.Printf("Game already in list and checkAllGames not set/true. Ignoring\n")
 		}
+		time.Sleep(2 * time.Second)
 	}	
 }
