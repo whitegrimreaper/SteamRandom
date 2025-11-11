@@ -9,6 +9,11 @@ import (
 	"gorm.io/driver/sqlite"
 )
 
+// For future reference
+// DB objects will have Entry appended
+// so Game is from the framework, and GameEntry is for the DB
+// TODO: could save all this info since storage space is not an issue at this level
+
 // This table will hold all games I own, regardless of if they are played or not
 type GameEntry struct {
 	ID           uint   `gorm:"primaryKey"`
